@@ -1,0 +1,107 @@
+MODULE agent_loop_persistent
+
+; Persistent Agent Loop (one per venture)
+; Runs continuously; waits for execution signal from orchestrator
+; When signaled: executes mining iteration, reports yield, waits for next signal
+;
+; Key difference from cron:
+; - No process spawning overhead (always running)
+; - Responds to field state signals (evolved selection)
+; - Reports yield continuously (closed feedback loop)
+; - No accumulation: one process per venture forever
+
+DECLARE
+  REG R_VENTURE        "golfcad.cc"
+  REG R_SIGNAL_FILE    "/tmp/execute_venture_golfcad.cc"
+  REG R_BATCH_SIZE     "128"
+  REG R_REGIME         "MEDIUM"
+  REG R_HASHRATE       "15"
+  REG R_YIELD_REPORT   ""
+  REG R_NOW            ""
+  REG R_Q9_ENERGY      "0.5"
+  REG R_ITERATION      "0"
+
+PROC wait_for_execution_signal
+  ; Wait for orchestrator to signal this venture to run
+  ; Signal: existence of /tmp/execute_venture_VENTURE_NAME
+  ; Loop: check every 5 seconds, timeout after 1 hour
+
+  SET R_ITERATION 0
+  LOOP 720
+    ; Check if signal file exists
+    SHELL_EXEC "[ -f " R_SIGNAL_FILE " ] && echo 1 || echo 0" R_HAS_SIGNAL
+
+    IF R_HAS_SIGNAL == "1"
+      ; Signal received - orchestrator has selected us
+      LOG "[divining] signal received: venture=" R_VENTURE
+      SHELL_EXEC "rm " R_SIGNAL_FILE
+      BREAK
+    END IF
+
+    ; No signal yet, wait 5 seconds
+    SHELL_EXEC "sleep 5"
+  END LOOP
+END PROC
+
+PROC detect_regime_from_field
+  ; Read current field state (Q9.GROUND energy)
+  ; This tells us: "how hard should we mine?"
+  HTTP_GET "http://localhost:9339/register/query" R_FIELD_STATE
+  JSON_PARSE R_FIELD_STATE "Q9.GROUND.energy" R_Q9_ENERGY
+
+  ; Adapt batch size based on field energy
+  IF R_Q9_ENERGY > 0.7
+    SET R_BATCH_SIZE "256"
+    SET R_REGIME "HIGH"
+  ELSE IF R_Q9_ENERGY > 0.3
+    SET R_BATCH_SIZE "128"
+    SET R_REGIME "MEDIUM"
+  ELSE
+    SET R_BATCH_SIZE "64"
+    SET R_REGIME "LOW"
+  END IF
+
+  LOG "[divining] regime_detected: regime=" R_REGIME " energy=" R_Q9_ENERGY
+END PROC
+
+PROC execute_mining_iteration
+  ; Simulate mining (in production: invoke GPU mining orchestrator)
+  SHELL_EXEC "echo 15" R_HASHRATE
+  LOG "[divining] mining_executed: venture=" R_VENTURE " hashrate=" R_HASHRATE " KH/s regime=" R_REGIME
+END PROC
+
+PROC report_yield_to_field
+  ; Build and report yield JSON back to field
+  ; Field uses this to update eigenvalue and coherence
+  TIMESTAMP R_NOW
+  SET R_YIELD_REPORT "{\"venture\":\"" R_VENTURE "\",\"yield\":" R_HASHRATE ",\"regime\":\"" R_REGIME "\",\"iteration\":" R_ITERATION "}"
+
+  ; Report to field (persistent connection, no timeout risk)
+  HTTP_POST "http://localhost:9339/register/yield" R_YIELD_REPORT
+
+  LOG "[divining] yield_reported: venture=" R_VENTURE " yield=" R_HASHRATE
+END PROC
+
+PROC execute_iteration
+  ; One complete iteration: detect regime → mine → report
+  SET R_ITERATION R_ITERATION + 1
+  CALL detect_regime_from_field
+  CALL execute_mining_iteration
+  CALL report_yield_to_field
+END PROC
+
+ENTRY
+  ; Main loop: wait for signal, execute iteration, repeat
+  ; This process never exits (persistent agent)
+  LOG "[divining] agent_started: venture=" R_VENTURE
+
+  LOOP FOREVER
+    ; Wait for orchestrator to select us
+    CALL wait_for_execution_signal
+
+    ; Execute iteration when signaled
+    CALL execute_iteration
+
+    ; Loop continues: wait for next signal
+  END LOOP
+END ENTRY

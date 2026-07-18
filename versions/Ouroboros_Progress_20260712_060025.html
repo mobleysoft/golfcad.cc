@@ -1,0 +1,1341 @@
+<!-- Ouroboros V4 Mutation Timestamp: 2026-07-12T06:00:25.424189 -->\n<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GOLFCAD.CC | Sovereign Corporate Portal</title>
+  <meta name="description" content="Canonical live root for golfcad.cc">
+  
+  <!-- Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --color-primary: #d4af37;
+      --color-accent: #1d3557;
+      --bg-gradient: linear-gradient(135deg, #0a0a0c 0%, #17181c 100%);
+      --void-glow: rgba(212, 175, 55, 0.15);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #030305;
+      color: #f0f0f5;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+      transition: filter 1.0s cubic-bezier(0.4, 0, 0.2, 1);
+      filter: brightness(0.45) blur(4px);
+    }
+    
+    #bg-canvas.interactive {
+      pointer-events: auto;
+      filter: brightness(1.0) blur(0px);
+    }
+    
+    #app-container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      backdrop-filter: blur(8px);
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    #app-container.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.98);
+    }
+    
+    header {
+      padding: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-primary);
+      text-shadow: 0 0 10px var(--void-glow);
+      letter-spacing: 1px;
+    }
+    
+    .logo span {
+      color: var(--color-accent);
+    }
+    
+    .status-badge {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--color-accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--color-accent);
+    }
+    
+    main {
+      flex: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 60px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .slideshow-container {
+      position: relative;
+      background: rgba(10, 10, 15, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .slide {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      animation: slideFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    .slide.active {
+      display: flex;
+    }
+    
+    @keyframes slideFade {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    .category-label {
+      display: inline-block;
+      padding: 6px 12px;
+      background: var(--void-glow);
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary);
+      border-radius: 30px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      align-self: flex-start;
+    }
+    
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 44px;
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
+    
+    .purpose-text {
+      font-size: 17px;
+      line-height: 1.6;
+      color: #b0b0c5;
+      margin-bottom: 30px;
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 10px;
+    }
+    
+    .metric-box {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    
+    .metric-label {
+      font-size: 12px;
+      color: #808095;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .metric-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-accent);
+    }
+    
+    /* Interactive Widget */
+    .widget-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      flex: 1;
+    }
+    
+    .widget-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .console-box {
+      flex: 1;
+      background: #020204;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 15px;
+      font-family: 'Space Grotesk', monospace;
+      font-size: 13px;
+      color: var(--color-accent);
+      min-height: 180px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+    }
+    
+    .console-input-row {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .console-input {
+      flex: 1;
+      background: #020204;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: monospace;
+      outline: none;
+      font-size: 13px;
+    }
+    
+    .console-input:focus {
+      border-color: var(--color-accent);
+    }
+    
+    .console-btn {
+      background: var(--color-primary);
+      border: none;
+      color: #000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      transition: all 0.2s;
+    }
+    
+    .console-btn:hover {
+      box-shadow: 0 0 12px var(--color-primary);
+    }
+    
+    .portal-trigger {
+      margin-top: 15px;
+      text-align: center;
+    }
+    
+    .portal-btn {
+      display: inline-block;
+      text-decoration: none;
+      color: #808095;
+      font-size: 12px;
+      padding: 8px 16px;
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.2s;
+    }
+    
+    .portal-btn:hover {
+      color: #fff;
+      border-color: var(--color-accent);
+    }
+    
+    /* Slideshow Controls */
+    .slideshow-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 25px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 20px;
+    }
+    
+    .slide-arrow {
+      background: none;
+      border: none;
+      color: #808095;
+      font-size: 16px;
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 5px 10px;
+    }
+    
+    .slide-arrow:hover {
+      color: #fff;
+    }
+    
+    .slide-dots {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .slide-dot {
+      width: 8px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .slide-dot:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+    
+    .slide-dot.active {
+      background: var(--color-primary);
+      box-shadow: 0 0 6px var(--color-primary);
+      transform: scale(1.25);
+    }
+    
+    /* Fleet browser drawer */
+    .fleet-browser-container {
+      position: relative;
+      width: 100%;
+    }
+    
+    .fleet-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      background: rgba(6, 6, 9, 0.97);
+      border-top: 1px solid var(--color-primary);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+      z-index: 998;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(15px);
+    }
+    
+    .fleet-drawer.open {
+      max-height: 280px;
+    }
+    
+    .fleet-drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .fleet-drawer-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: var(--color-accent);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    
+    .close-drawer-btn {
+      background: none;
+      border: none;
+      color: #808095;
+      font-size: 18px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    
+    .close-drawer-btn:hover {
+      color: #fff;
+    }
+    
+    .fleet-links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      padding: 20px 40px;
+      overflow-y: auto;
+      max-height: 200px;
+    }
+    
+    .fleet-link {
+      color: #808095;
+      text-decoration: none;
+      font-size: 12px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      transition: all 0.2s;
+      font-family: 'Space Grotesk', sans-serif;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      text-align: left;
+    }
+    
+    .fleet-link:hover {
+      background: var(--void-glow);
+      border-color: var(--color-primary);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+    
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 40px 20px;
+      background: rgba(5,5,8,0.9);
+      margin-top: auto;
+    }
+    
+    .footer-content {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    
+    .network-tray {
+      margin-bottom: 25px;
+    }
+    
+    .network-tray-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #606075;
+      margin-bottom: 15px;
+    }
+    
+    .cat-chips {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+    }
+    
+    .cat-chip {
+      display: inline-block;
+      font-size: 11px;
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      color: #808095;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    .cat-chip:hover, .cat-chip.active {
+      background: var(--void-glow);
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+    
+    .footer-purpose {
+      color: #505065;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    /* Login Screen Modal Overlay (Secure Portal) */
+    #os-login-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(3, 3, 5, 0.95);
+      z-index: 999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(15px);
+    }
+    
+    .login-box {
+      width: 100%;
+      max-width: 400px;
+      background: rgba(10, 10, 15, 0.6);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+      text-align: center;
+    }
+    
+    .login-box h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: var(--color-primary);
+    }
+    
+    .login-box p {
+      color: #808095;
+      font-size: 13px;
+      margin-bottom: 30px;
+    }
+    
+    .login-input {
+      width: 100%;
+      background: #020204;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 15px;
+      margin-bottom: 15px;
+      outline: none;
+      font-family: monospace;
+    }
+    
+    .login-input:focus {
+      border-color: var(--color-accent);
+    }
+    
+    .login-button {
+      width: 100%;
+      background: var(--color-primary);
+      color: #000;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    .login-button:hover {
+      box-shadow: 0 0 15px var(--color-primary);
+    }
+    
+    .close-modal {
+      margin-top: 15px;
+      font-size: 13px;
+      color: #606075;
+      cursor: pointer;
+    }
+    
+    .close-modal:hover {
+      color: #fff;
+    }
+
+    /* Mobile media queries */
+    @media (max-width: 600px) {
+      header { padding: 15px 20px; }
+      .logo { font-size: 20px; }
+      h1 { font-size: 28px; }
+      .purpose-text { font-size: 14px; line-height: 1.5; }
+      .slideshow-container { padding: 20px; min-height: auto; }
+      .metrics-grid { grid-template-columns: 1fr; gap: 10px; }
+      .fleet-drawer-header { padding: 15px 20px; }
+      .fleet-links-grid { padding: 15px 20px; grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- The Animated Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+  
+  <div id="app-container">
+    
+    <header>
+      <div class="logo">🏢 GOLFCAD COM<span>.</span></div>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>Corporate Secure</span>
+      </div>
+    </header>
+    
+    <main>
+      <div class="slideshow-container">
+        
+        <!-- Slide 0: Venture Overview -->
+        <div class="slide active" id="slide-0">
+          <div class="category-label">Corporate Overview</div>
+          <h1>golfcad.cc</h1>
+          <p class="purpose-text">Canonical live root for golfcad.cc</p>
+        </div>
+        
+        <!-- Slide 1: Solutions & Engagement -->
+        <div class="slide" id="slide-1">
+          <div class="category-label">Corporate Solutions</div>
+          <div class="metrics-grid">
+            <div class="metric-box" style="grid-column: span 2;">
+              <div class="metric-label">Primary Product Line</div>
+              <div class="metric-value" style="font-size: 16px; padding-top: 5px; line-height: 1.4; color: var(--color-accent); font-weight: bold;">
+                Canonical Live Root for Golfcad.cc
+              </div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Core Capabilities</div>
+              <div class="metric-value" style="font-size: 13px; padding-top: 5px; line-height: 1.5; color: #f0f0f5; font-weight: normal;">
+                Tailored solutions and high-end services optimized for Corporate firms.
+              </div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Engagement Model</div>
+              <div class="metric-value" style="font-size: 14px; padding-top: 5px; line-height: 1.4; color: #f0f0f5; font-weight: bold;">
+                Subscription fee
+              </div>
+            </div>
+          </div>
+          <p style="color: #606075; font-size: 12px; margin-top: 15px;">🔒 Submit credentials at the secure gate to initiate partnership discussions.</p>
+        </div>
+        
+        <!-- Slide 2: Interactive Console -->
+        <div class="slide" id="slide-2">
+          <div class="widget-card">
+            <div class="widget-title">
+              <span>📟</span> Interactive Console
+            </div>
+            <div class="console-box" id="console-display">
+              System initialized.<br>
+              Category: Corporate<br>
+              Status: READY<br>
+              Type 'help' to begin...<br>
+              <br>
+              &gt;
+            </div>
+            <div class="console-input-row">
+              <input type="text" class="console-input" id="console-cmd" placeholder="Type a command...">
+              <button class="console-btn" onclick="executeCommand()">Run</button>
+            </div>
+            <div class="portal-trigger">
+              <a href="#" class="portal-btn" onclick="openLoginModal()">Access Secure Portal</a>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Slideshow Controls -->
+        <div class="slideshow-controls">
+          <button class="slide-arrow prev-arrow" onclick="changeSlide(-1)">◀</button>
+          <div class="slide-dots">
+            <span class="slide-dot active" onclick="goToSlide(0)"></span>
+            <span class="slide-dot" onclick="goToSlide(1)"></span>
+            <span class="slide-dot" onclick="goToSlide(2)"></span>
+          </div>
+          <button class="slide-arrow next-arrow" onclick="changeSlide(1)">▶</button>
+        </div>
+        
+      </div>
+    </main>
+    
+    <footer>
+      <div class="footer-content">
+        <div class="fleet-browser-container">
+          <div class="fleet-drawer" id="fleet-drawer">
+            <div class="fleet-drawer-header">
+              <div class="fleet-drawer-title" id="fleet-drawer-title">Explore Fleet Category</div>
+              <button class="close-drawer-btn" onclick="closeFleetDrawer()">✕</button>
+            </div>
+            <div class="fleet-links-grid" id="fleet-links-grid"></div>
+          </div>
+          
+          <div class="network-tray">
+            <div class="network-tray-title">Explore the 121 Site Fleet</div>
+            <div class="cat-chips">
+              <span class="cat-chip" onclick="toggleFleetCategory('AI')">AI</span> <span class="cat-chip" onclick="toggleFleetCategory('Agents')">Agents</span> <span class="cat-chip" onclick="toggleFleetCategory('Business')">Business</span> <span class="cat-chip" onclick="toggleFleetCategory('Corporate')">Corporate</span> <span class="cat-chip" onclick="toggleFleetCategory('Defense')">Defense</span> <span class="cat-chip" onclick="toggleFleetCategory('Dev Tools')">Dev Tools</span> <span class="cat-chip" onclick="toggleFleetCategory('Education')">Education</span> <span class="cat-chip" onclick="toggleFleetCategory('Finance')">Finance</span> <span class="cat-chip" onclick="toggleFleetCategory('Health')">Health</span> <span class="cat-chip" onclick="toggleFleetCategory('Media')">Media</span> <span class="cat-chip" onclick="toggleFleetCategory('Science')">Science</span> 
+            </div>
+          </div>
+        </div>
+        
+        <div class="footer-purpose">
+          <p>This venture is a canonical node of the MobCorp Autonomous Network. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+    
+  </div>
+
+  <!-- The Login Screen Modal Overlay -->
+  <div id="os-login-modal">
+    <div class="login-box">
+      <h2>Secure Client Portal</h2>
+      <p>Secure Node: golfcad.cc</p>
+      <input type="email" class="login-input" id="modal-email" placeholder="Email / Username">
+      <input type="password" class="login-input" id="modal-pass" placeholder="Authorization Code">
+      <button class="login-button" onclick="submitAuth()">Sign In</button>
+      <div class="close-modal" onclick="closeLoginModal()">Cancel</div>
+    </div>
+  </div>
+
+  <script>
+    // ── Slideshow Logic ──────────────────────────────────────────────────────
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.slide-dot');
+    
+    function goToSlide(index) {
+      slides[currentSlide].classList.remove('active');
+      dots[currentSlide].classList.remove('active');
+      currentSlide = (index + slides.length) % slides.length;
+      slides[currentSlide].classList.add('active');
+      dots[currentSlide].classList.add('active');
+      resetIdleTimer();
+    }
+    
+    function changeSlide(direction) {
+      goToSlide(currentSlide + direction);
+    }
+
+    // Keyboard navigation (when console input is not active)
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft') {
+        changeSlide(-1);
+      } else if (e.key === 'ArrowRight') {
+        changeSlide(1);
+      }
+    });
+
+    // ── Custom Console commands simulation ───────────────────────────────────
+    const consoleDisplay = document.getElementById('console-display');
+    const consoleCmd = document.getElementById('console-cmd');
+    
+    consoleCmd.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') executeCommand();
+    });
+
+    function executeCommand() {
+      const cmd = consoleCmd.value.trim().toLowerCase();
+      if (!cmd) return;
+      
+      let response = '';
+      if (cmd === 'help') {
+        response = 'Available commands:\n' +
+                   '  status   - View current venture status\n' +
+                   '  pricing  - View client engagement and pricing\n' +
+                   '  gateways - List secure regional gateways\n' +
+                   '  clear    - Clear console screen';
+      } else if (cmd === 'status') {
+        response = 'System: golfcad.cc\n' +
+                   'Venture Name: golfcad_com\n' +
+                   'Category: Corporate\n' +
+                   'Operational Integrity: 100% (READY)\n' +
+                   'Primary Product Line: Canonical Live Root for Golfcad.cc\n' +
+                   'Core Capabilities: Tailored solutions and high-end services optimized for Corporate firms.';
+      } else if (cmd === 'pricing') {
+        response = 'Client Engagement Structure:\n' +
+                   '  Pricing Model: Subscription fee\n' +
+                   '  For custom inquiries or enterprise tier agreements, please authenticate via the secure portal.';
+      } else if (cmd === 'gateways') {
+        response = 'Secure Regional Gateways:\n' +
+                   '  - Americas Gateway (ACTIVE)\n' +
+                   '  - EMEA Gateway (ACTIVE)\n' +
+                   '  - APAC Gateway (ACTIVE)';
+      } else if (cmd === 'clear') {
+        consoleDisplay.innerHTML = '&gt; ';
+        consoleCmd.value = '';
+        return;
+      } else {
+        response = 'Unknown command: "' + cmd + '". Type "help" for a list of commands.';
+      }
+      
+      consoleDisplay.innerHTML += cmd + '<br>' + response.replace(/\n/g, '<br>') + '<br><br>&gt; ';
+      consoleDisplay.scrollTop = consoleDisplay.scrollHeight;
+      consoleCmd.value = '';
+    }
+
+    function openLoginModal() {
+      document.getElementById('os-login-modal').style.display = 'flex';
+    }
+    
+    function closeLoginModal() {
+      document.getElementById('os-login-modal').style.display = 'none';
+    }
+    
+    function submitAuth() {
+      const email = document.getElementById('modal-email').value;
+      const pass = document.getElementById('modal-pass').value;
+      if (!email || !pass) {
+        alert('Credentials required.');
+        return;
+      }
+      alert('Secure Portal connection timed out. Please check your credentials and try again.');
+    }
+
+    // ── Fleet Browser Logic ──────────────────────────────────────────────────
+    const FLEET_DATA = {"Defense": [{"domain": "abstergo.cc", "name": "abstergo_com"}, {"domain": "areshiva.com", "name": "areshiva_com"}, {"domain": "draknir.com", "name": "draknir_com"}, {"domain": "draugr.cc", "name": "draugr_com"}, {"domain": "malathor.com", "name": "malathor_com"}, {"domain": "valdring.com", "name": "valdring_com"}, {"domain": "valkrai.com", "name": "valkrai_com"}, {"domain": "ventraleye.com", "name": "ventraleye_com"}, {"domain": "watchforce.cc", "name": "watchforce_com"}], "Finance": [{"domain": "accountdrac.com", "name": "accountdrac_com"}, {"domain": "bitdoggo.com", "name": "bitdoggo_com"}, {"domain": "bondwright.com", "name": "bondwright_com"}, {"domain": "bookeepr.cc", "name": "bookeepr_com"}, {"domain": "cryptosmart.cc", "name": "cryptosmart_com"}, {"domain": "encoverai.com", "name": "encoverai_com"}, {"domain": "equifiant.com", "name": "equifiant_com"}, {"domain": "fedbank.cc", "name": "fedbank_com"}, {"domain": "fundyai.com", "name": "fundyai_com"}, {"domain": "greenhandcapital.com", "name": "greenhandcapital_com"}, {"domain": "mobcoin.cc", "name": "mobcoin_com"}, {"domain": "quanticfork.com", "name": "quanticfork_com"}, {"domain": "selfcoin.cc", "name": "selfcoin_com"}, {"domain": "vendyai.com", "name": "vendyai_com"}], "Agents": [{"domain": "agentropi.com", "name": "agentropi_com"}, {"domain": "agentzaar.com", "name": "agentzaar_com"}, {"domain": "consenta.cc", "name": "consenta_com"}, {"domain": "entoolize.com", "name": "entoolize_com"}, {"domain": "mailguyai.com", "name": "mailguyai_com"}, {"domain": "marketingium.com", "name": "marketingium_com"}, {"domain": "rebrief.me", "name": "rebrief_com"}, {"domain": "salesfactorai.com", "name": "salesfactorai_com"}, {"domain": "taskgridai.com", "name": "taskgridai_com"}], "Health": [{"domain": "agewinder.com", "name": "agewinder_com"}, {"domain": "healspell.com", "name": "healspell_com"}, {"domain": "lovemaint.com", "name": "lovemaint_com"}, {"domain": "meeva.io", "name": "meeva_com"}, {"domain": "newgameplus.cc", "name": "newgameplus_com"}, {"domain": "recovai.com", "name": "recovai_com"}, {"domain": "sanctuaryui.com", "name": "sanctuaryui_com"}, {"domain": "talkingmind.cc", "name": "talkingmind_com"}, {"domain": "workshrinker.com", "name": "workshrinker_com"}, {"domain": "youthmend.com", "name": "youthmend_com"}], "AI": [{"domain": "aicossic.com", "name": "aicossic_com"}, {"domain": "americanagi.cc", "name": "americanagi_com"}, {"domain": "americnagi.cc", "name": "americnagi_com"}, {"domain": "bloomagi.cc", "name": "bloomagi_com"}, {"domain": "greybeardai.com", "name": "greybeardai_com"}, {"domain": "intfer.cc", "name": "intfer_com"}, {"domain": "legibleweights.com", "name": "legibleweights_com"}, {"domain": "legionicai.com", "name": "legionicai_com"}, {"domain": "scalarflux.com", "name": "scalarflux_com"}, {"domain": "sentiantai.com", "name": "sentiantai_com"}, {"domain": "singularityui.com", "name": "singularityui_com"}, {"domain": "transcendantai.com", "name": "transcendantai_com"}], "Science": [{"domain": "aiopencommerce.com", "name": "aiopencommerce_com"}, {"domain": "anattar.com", "name": "anattar_com"}, {"domain": "conseiv.com", "name": "conseiv_com"}, {"domain": "ecofixai.com", "name": "ecofixai_com"}, {"domain": "emissionhub.cc", "name": "emissionhub_com"}, {"domain": "enablinghomes.com", "name": "enablinghomes_com"}, {"domain": "femptocom.com", "name": "femptocom_com"}, {"domain": "galadul.com", "name": "galadul_com"}, {"domain": "tenancyai.com", "name": "tenancyai_com"}, {"domain": "weylandai.com", "name": "weylandai_com"}, {"domain": "yutaniai.com", "name": "yutaniai_com"}], "Media": [{"domain": "alhena.cc", "name": "alhena_com"}, {"domain": "animetrope.com", "name": "animetrope_com"}, {"domain": "audiovizai.com", "name": "audiovizai_com"}, {"domain": "book2film.cc", "name": "book2film_com"}, {"domain": "bookclubs.cc", "name": "bookclubs_com"}, {"domain": "danzoa.com", "name": "danzoa_com"}, {"domain": "fedtalent.cc", "name": "fedtalent_com"}, {"domain": "filmline.cc", "name": "filmline_com"}, {"domain": "gamegob.com", "name": "gamegob_com"}, {"domain": "glyphyai.com", "name": "glyphyai_com"}, {"domain": "kubaki.cc", "name": "kubaki_com"}, {"domain": "literacraft.com", "name": "literacraft_com"}, {"domain": "mobleybooks.com", "name": "mobleybooks_com"}, {"domain": "paintedwhore.cc", "name": "paintedwhore_com"}, {"domain": "pandorachat.cc", "name": "pandorachat_com"}], "Dev Tools": [{"domain": "authfor.com", "name": "authfor_com"}, {"domain": "devducky.com", "name": "devducky_com"}, {"domain": "devtoolai.com", "name": "devtoolai_com"}, {"domain": "devtoolbx.com", "name": "devtoolbx_com"}, {"domain": "extraterran.com", "name": "extraterran_com"}, {"domain": "fystz.com", "name": "fystz_com"}, {"domain": "gravnova.com", "name": "gravnova_com"}, {"domain": "halside.com", "name": "halside_com"}, {"domain": "helmdir.com", "name": "helmdir_com"}, {"domain": "powerhost.cc", "name": "powerhost_com"}, {"domain": "syncropy.com", "name": "syncropy_com"}, {"domain": "warpdrive.cc", "name": "warpdrive_com"}], "Education": [{"domain": "bignice.cc", "name": "bignice_com"}, {"domain": "brynhildai.com", "name": "brynhildai_com"}, {"domain": "gurukle.com", "name": "gurukle_com"}, {"domain": "leadersclub.cc", "name": "leadersclub_com"}, {"domain": "ownschool.cc", "name": "ownschool_com"}, {"domain": "reasontodate.com", "name": "reasontodate_com"}], "Business": [{"domain": "dofura.com", "name": "dofura_com"}, {"domain": "domainwombat.com", "name": "domainwombat_com"}, {"domain": "firmcreate.com", "name": "firmcreate_com"}, {"domain": "glcx.cc", "name": "glcx_com"}, {"domain": "helmcorp.cc", "name": "helmcorp_com"}, {"domain": "hildrai.com", "name": "hildrai_com"}, {"domain": "industrize.com", "name": "industrize_com"}, {"domain": "lawyik.com", "name": "lawyik_com"}, {"domain": "patentkin.com", "name": "patentkin_com"}, {"domain": "traceformer.com", "name": "traceformer_com"}], "Corporate": [{"domain": "golfcad.cc", "name": "golfcad_com"}, {"domain": "golfdad.cc", "name": "golfdad_com"}, {"domain": "golflink.cc", "name": "golflink_com"}, {"domain": "golfmind.cc", "name": "golfmind_com"}, {"domain": "helmscorp.cc", "name": "helmscorp_com"}, {"domain": "instantiability.com", "name": "instantiability_com"}, {"domain": "mobcorp.cc", "name": "mobcorp_com"}, {"domain": "mobleyhelms.com", "name": "mobleyhelms_com"}, {"domain": "mobleymetal.com", "name": "mobleymetal_com"}, {"domain": "mobleyreport.com", "name": "mobleyreport_com"}, {"domain": "mobleysoft.com", "name": "mobleysoft_com"}, {"domain": "roncorp.cc", "name": "roncorp_com"}, {"domain": "ronhelms.cc", "name": "ronhelms_com"}]};
+    const fleetDrawer = document.getElementById('fleet-drawer');
+    const fleetDrawerTitle = document.getElementById('fleet-drawer-title');
+    const fleetLinksGrid = document.getElementById('fleet-links-grid');
+    let activeFleetCat = null;
+
+    function toggleFleetCategory(cat) {
+      if (activeFleetCat === cat) {
+        closeFleetDrawer();
+        return;
+      }
+      
+      activeFleetCat = cat;
+      document.querySelectorAll('.cat-chip').forEach(c => {
+        c.classList.toggle('active', c.textContent.trim() === cat);
+      });
+
+      fleetDrawerTitle.textContent = `${cat.toUpperCase()} FLEET SITES`;
+      fleetLinksGrid.innerHTML = '';
+      
+      const sites = FLEET_DATA[cat] || [];
+      sites.forEach(s => {
+        const a = document.createElement('a');
+        a.href = `https://${s.domain}/`;
+        a.target = '_blank';
+        a.className = 'fleet-link';
+        a.textContent = s.name.replace(/_/g, ' ').toUpperCase();
+        fleetLinksGrid.appendChild(a);
+      });
+      
+      fleetDrawer.classList.add('open');
+      resetIdleTimer();
+    }
+    
+    function closeFleetDrawer() {
+      if (!fleetDrawer) return;
+      fleetDrawer.classList.remove('open');
+      activeFleetCat = null;
+      document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    }
+
+    // Close fleet drawer on outside click
+    document.addEventListener('click', (e) => {
+      if (fleetDrawer && !fleetDrawer.contains(e.target) && !e.target.classList.contains('cat-chip')) {
+        closeFleetDrawer();
+      }
+    });
+
+    // ── Interaction & Idle Show/Hide ─────────────────────────────────────────
+    const appContainer = document.getElementById('app-container');
+    const canvas = document.getElementById('bg-canvas');
+    let idleTimer = null;
+    
+    function showUI() {
+      appContainer.classList.remove('hidden');
+      canvas.classList.remove('interactive');
+      resetIdleTimer();
+    }
+    
+    function hideUI() {
+      appContainer.classList.add('hidden');
+      canvas.classList.add('interactive');
+      closeFleetDrawer();
+    }
+    
+    function resetIdleTimer() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(hideUI, 5000); // 5 seconds of idle
+    }
+    
+    // Wire up events
+    document.addEventListener('mousemove', showUI);
+    document.addEventListener('click', showUI);
+    document.addEventListener('keydown', showUI);
+    document.addEventListener('touchstart', showUI);
+    
+    // Prevent hiding while interacting with the overlay
+    appContainer.addEventListener('mousemove', (e) => { e.stopPropagation(); resetIdleTimer(); });
+    appContainer.addEventListener('click', (e) => { e.stopPropagation(); resetIdleTimer(); });
+    appContainer.addEventListener('keydown', (e) => { e.stopPropagation(); resetIdleTimer(); });
+    
+    // Start showing overlay, then let it fade
+    resetIdleTimer();
+
+    // ── Dynamic Category-specific Canvas Animations ──────────────────────────
+    (function() {
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+      
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+      
+      let time = 0;
+      const particles = [];
+      const sparks = [];
+      const mode = "blackhole";
+      
+      let mouseX = -1000;
+      let mouseY = -1000;
+      let targetMouseX = -1000;
+      let targetMouseY = -1000;
+      let isMouseDown = false;
+
+      // Mouse Listeners
+      window.addEventListener('mousemove', (e) => {
+        const isInteractive = canvas.classList.contains('interactive');
+        if (isInteractive) {
+          targetMouseX = e.clientX;
+          targetMouseY = e.clientY;
+          if (sparks.length < 80 && Math.random() < 0.4) {
+            sparks.push({
+              x: e.clientX,
+              y: e.clientY,
+              vx: (Math.random() - 0.5) * 1.5,
+              vy: (Math.random() - 0.5) * 1.5,
+              alpha: 1.0,
+              size: Math.random() * 2 + 1
+            });
+          }
+        } else {
+          targetMouseX = -1000;
+          targetMouseY = -1000;
+        }
+      });
+
+      window.addEventListener('mousedown', (e) => {
+        const isInteractive = canvas.classList.contains('interactive');
+        if (isInteractive) {
+          isMouseDown = true;
+          for (let k = 0; k < 12; k++) {
+            sparks.push({
+              x: e.clientX,
+              y: e.clientY,
+              vx: (Math.random() - 0.5) * 4,
+              vy: (Math.random() - 0.5) * 4,
+              alpha: 1.0,
+              size: Math.random() * 3 + 1.5
+            });
+          }
+        }
+      });
+
+      window.addEventListener('mouseup', () => { isMouseDown = false; });
+      window.addEventListener('mouseleave', () => { targetMouseX = -1000; targetMouseY = -1000; isMouseDown = false; });
+      
+      // Initialize particles
+      if (mode === 'neural' || mode === 'molecular' || mode === 'radar') {
+        for (let i = 0; i < 40; i++) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.8,
+            vy: (Math.random() - 0.5) * 0.8,
+            r: Math.random() * 2 + 1
+          });
+        }
+      }
+      
+      function draw() {
+        const ctx = canvas.getContext('2d');
+        const isInteractive = canvas.classList.contains('interactive');
+        
+        if (mode === 'matrix') {
+          ctx.fillStyle = 'rgba(3, 3, 5, 0.08)';
+          ctx.fillRect(0, 0, width, height);
+        } else {
+          ctx.fillStyle = isInteractive ? 'rgba(3, 3, 5, 0.15)' : 'rgba(3, 3, 5, 0.08)';
+          ctx.fillRect(0, 0, width, height);
+        }
+        
+        if (targetMouseX > -500) {
+          if (mouseX < -500) {
+            mouseX = targetMouseX;
+            mouseY = targetMouseY;
+          } else {
+            mouseX += (targetMouseX - mouseX) * 0.12;
+            mouseY += (targetMouseY - mouseY) * 0.12;
+          }
+        } else {
+          mouseX = -1000;
+          mouseY = -1000;
+        }
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+        
+        if (mode === 'blackhole') {
+          const px = mouseX > -500 ? mouseX : centerX;
+          const py = mouseY > -500 ? mouseY : centerY;
+          
+          // Draw dark core
+          ctx.fillStyle = '#030305';
+          ctx.beginPath(); ctx.arc(px, py, 45, 0, Math.PI * 2); ctx.fill();
+          
+          // Event horizon glow
+          const grad = ctx.createRadialGradient(px, py, 42, px, py, 90);
+          grad.addColorStop(0, 'rgba(212, 175, 55, 0.4)');
+          grad.addColorStop(0.2, 'rgba(212, 175, 55, 0.15)');
+          grad.addColorStop(1, 'rgba(212, 175, 55, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath(); ctx.arc(px, py, 90, 0, Math.PI * 2); ctx.fill();
+          
+          // Initialize blackhole particles if needed
+          if (!window.bhParticles || window.bhParticles.length === 0) {
+            window.bhParticles = [];
+            for (let i = 0; i < 150; i++) {
+              const r = 60 + Math.random() * 250;
+              window.bhParticles.push({
+                r: r,
+                angle: Math.random() * Math.PI * 2,
+                speed: 0.8 + Math.random() * 1.5,
+                size: Math.random() * 1.5 + 0.5
+              });
+            }
+          }
+          
+          // Render particles orbiting and getting sucked in
+          ctx.fillStyle = 'rgba(212, 175, 55, 0.5)';
+          window.bhParticles.forEach(p => {
+            p.angle += (p.speed * 8.0 / p.r);
+            p.r -= 0.12;
+            if (p.r < 45) {
+              p.r = 250 + Math.random() * 100;
+              p.angle = Math.random() * Math.PI * 2;
+            }
+            
+            const bx = px + Math.cos(p.angle) * p.r;
+            const by = py + Math.sin(p.angle) * p.r;
+            
+            ctx.beginPath();
+            ctx.arc(bx, by, p.size, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+        else if (mode === 'grid') {
+          ctx.strokeStyle = 'rgba(212, 175, 55, 0.03)';
+          ctx.lineWidth = 1;
+          const spacing = 60;
+          const offset = (time * 0.2) % spacing;
+          
+          for (let x = offset; x < width; x += spacing) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+          }
+          for (let y = offset; y < height; y += spacing) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+          }
+
+          if (mouseX > -500) {
+            ctx.strokeStyle = 'rgba(212, 175, 55, 0.15)';
+            ctx.beginPath();
+            ctx.moveTo(mouseX, 0); ctx.lineTo(mouseX, height);
+            ctx.moveTo(0, mouseY); ctx.lineTo(width, mouseY);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(212, 175, 55, 0.3)';
+            ctx.beginPath(); ctx.arc(mouseX, mouseY, 4, 0, Math.PI * 2); ctx.fill();
+          }
+        } 
+        else if (mode === 'neural' || mode === 'molecular') {
+          ctx.fillStyle = 'rgba(212, 175, 55, 0.4)';
+          ctx.strokeStyle = 'rgba(212, 175, 55, 0.06)';
+          
+          particles.forEach((p, index) => {
+            if (mouseX > -500) {
+              const dx = mouseX - p.x;
+              const dy = mouseY - p.y;
+              const dDist = Math.hypot(dx, dy);
+              if (dDist < 200) {
+                const force = (200 - dDist) / 200;
+                const factor = isMouseDown ? 0.08 : 0.02;
+                p.x += dx * force * factor;
+                p.y += dy * force * factor;
+              }
+            }
+
+            p.x += p.vx;
+            p.y += p.vy;
+            
+            if (p.x < 0 || p.x > width) p.vx *= -1;
+            if (p.y < 0 || p.y > height) p.vy *= -1;
+            
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+            
+            for (let j = index + 1; j < particles.length; j++) {
+              const p2 = particles[j];
+              const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+              if (dist < 120) {
+                ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+              }
+            }
+          });
+
+          if (mouseX > -500) {
+            ctx.strokeStyle = isMouseDown ? 'rgba(212, 175, 55, 0.25)' : 'rgba(212, 175, 55, 0.1)';
+            particles.forEach(p => {
+              const dist = Math.hypot(p.x - mouseX, p.y - mouseY);
+              if (dist < 160) {
+                ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mouseX, mouseY); ctx.stroke();
+              }
+            });
+          }
+        } 
+        else if (mode === 'radar') {
+          ctx.strokeStyle = 'var(--color-primary)';
+          const maxR = Math.hypot(width, height) / 2;
+          const sweep = (time * 0.005) % (Math.PI * 2);
+          
+          ctx.lineWidth = 1;
+          for (let r = 100; r < maxR; r += 150) {
+            ctx.strokeStyle = 'rgba(212, 175, 55, 0.02)';
+            ctx.beginPath(); ctx.arc(centerX, centerY, r, 0, Math.PI * 2); ctx.stroke();
+          }
+          
+          ctx.strokeStyle = 'rgba(212, 175, 55, 0.08)';
+          ctx.beginPath(); ctx.moveTo(centerX, centerY);
+          ctx.lineTo(centerX + Math.cos(sweep) * maxR, centerY + Math.sin(sweep) * maxR);
+          ctx.stroke();
+
+          if (mouseX > -500) {
+            ctx.strokeStyle = isMouseDown ? 'rgba(231, 29, 54, 0.4)' : 'rgba(212, 175, 55, 0.25)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(mouseX, mouseY, 15, 0, Math.PI * 2); ctx.arc(mouseX, mouseY, 30, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(mouseX - 40, mouseY); ctx.lineTo(mouseX - 20, mouseY);
+            ctx.moveTo(mouseX + 20, mouseY); ctx.lineTo(mouseX + 40, mouseY);
+            ctx.moveTo(mouseX, mouseY - 40); ctx.lineTo(mouseX, mouseY - 20);
+            ctx.moveTo(mouseX, mouseY + 20); ctx.lineTo(mouseX, mouseY + 40);
+            ctx.stroke();
+          }
+        }
+        else if (mode === 'candles') {
+          ctx.lineWidth = 1.5;
+          const spacing = 35;
+          const barCount = Math.floor(width / spacing);
+          for (let i = 0; i < barCount; i++) {
+            const x = i * spacing + 15;
+            const hashVal = Math.sin(i * 0.5 + time * 0.005);
+            const centerY_bar = centerY + hashVal * 120 + Math.cos(i * 0.1) * 30;
+            const open = centerY_bar - Math.sin(i * 0.8 + time * 0.01) * 20;
+            const close = centerY_bar + Math.cos(i * 0.9 + time * 0.01) * 20;
+            const high = Math.min(open, close) - 15 - Math.abs(Math.sin(time*0.02 + i))*10;
+            const low = Math.max(open, close) + 15 + Math.abs(Math.cos(time*0.02 + i))*10;
+            
+            const isUp = close < open;
+            ctx.strokeStyle = isUp ? 'rgba(6, 214, 160, 0.25)' : 'rgba(239, 71, 111, 0.25)';
+            ctx.fillStyle = isUp ? 'rgba(6, 214, 160, 0.08)' : 'rgba(239, 71, 111, 0.08)';
+            
+            ctx.beginPath();
+            ctx.moveTo(x, high);
+            ctx.lineTo(x, low);
+            ctx.stroke();
+            
+            const h = Math.abs(close - open);
+            ctx.fillRect(x - 6, Math.min(open, close), 12, h || 2);
+            ctx.strokeRect(x - 6, Math.min(open, close), 12, h || 2);
+          }
+        }
+        else if (mode === 'matrix') {
+          ctx.font = '14px monospace';
+          ctx.fillStyle = 'rgba(212, 175, 55, 0.35)';
+          
+          if (!window.matrixColumns) {
+            const cols = Math.floor(width / 20);
+            window.matrixColumns = Array(cols).fill(0);
+          }
+          
+          window.matrixColumns.forEach((y, x) => {
+            const char = String.fromCharCode(33 + Math.floor(Math.random() * 93));
+            ctx.fillText(char, x * 20, y);
+            if (y > height && Math.random() > 0.975) {
+              window.matrixColumns[x] = 0;
+            } else {
+              window.matrixColumns[x] = y + 16;
+            }
+          });
+        }
+        else if (mode === 'terminal') {
+          ctx.font = '13px monospace';
+          ctx.fillStyle = 'rgba(212, 175, 55, 0.15)';
+          const lines = [
+            "SYS.INIT_SEQUENCE: SUCCESS",
+            "LOAD_SECTOR_INGRESS: PORTAL_READY",
+            "SECURITY_LEVEL: SECURE_CLIENT_ACCESS",
+            "ENCRYPTION_STATUS: ESTABLISHED",
+            "REGIONAL_GATEWAY: ONLINE",
+            "PORTAL_VERSION: STABLE_V2",
+            "HOST_INTEGRITY: 100% READY",
+            "MEM_LOAD: OPTIMAL",
+            "FABRIC: ACTIVE"
+          ];
+          const spacing = 24;
+          const maxLines = Math.floor(height / spacing) - 2;
+          for (let i = 0; i < maxLines; i++) {
+            const lineIdx = (i + Math.floor(time / 60)) % lines.length;
+            const text = lines[lineIdx] + " ... " + (Math.random() > 0.5 ? "OK" : "RUNNING");
+            const y = (i + 1) * spacing + 20;
+            ctx.fillText(text, 40, y);
+          }
+        }
+        else if (mode === 'waves') {
+          ctx.strokeStyle = 'rgba(212, 175, 55, 0.12)';
+          ctx.lineWidth = 1.5;
+          const wavesCount = 4;
+          for (let w = 0; w < wavesCount; w++) {
+            ctx.beginPath();
+            const offset = w * 50 + time * 0.012;
+            const amp = 35 + w * 12;
+            const freq = 0.002 + w * 0.0008;
+            for (let x = 0; x < width; x += 6) {
+              const y = centerY + Math.sin(x * freq + offset) * amp + Math.cos(x * 0.004 - offset) * 12;
+              if (x === 0) ctx.moveTo(x, y);
+              else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+          }
+        }
+        else if (mode === 'orbit') {
+          ctx.fillStyle = 'rgba(212, 175, 55, 0.05)';
+          ctx.beginPath(); ctx.arc(centerX, centerY, 45, 0, Math.PI*2); ctx.fill();
+          
+          const planetCount = 4;
+          for (let p = 0; p < planetCount; p++) {
+            const radius = 110 + p * 65;
+            const speed = 0.008 / (p * 0.6 + 1);
+            const angle = time * speed;
+            const px = centerX + Math.cos(angle) * radius;
+            const py = centerY + Math.sin(angle) * radius;
+            
+            ctx.strokeStyle = 'rgba(212, 175, 55, 0.02)';
+            ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, Math.PI*2); ctx.stroke();
+            
+            ctx.fillStyle = 'rgba(212, 175, 55, 0.5)';
+            ctx.beginPath(); ctx.arc(px, py, 5 + p, 0, Math.PI*2); ctx.fill();
+          }
+        }
+        else if (mode === 'heartbeat') {
+          ctx.strokeStyle = 'rgba(212, 175, 55, 0.16)';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          const scanX = (time * 2.5) % width;
+          for (let x = 0; x < width; x += 3) {
+            let y = centerY;
+            const dist = Math.abs(x - scanX);
+            if (dist < 120) {
+              const norm = (120 - dist) / 120;
+              const pulse = Math.sin(x * 0.18) * Math.cos(x * 0.04);
+              y += pulse * 90 * norm * Math.sin(time * 0.08);
+            }
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        }
+        else if (mode === 'cards') {
+          ctx.strokeStyle = 'rgba(212, 175, 55, 0.07)';
+          ctx.lineWidth = 1.5;
+          const boxCount = 3;
+          for (let b = 0; b < boxCount; b++) {
+            const bx = centerX + Math.sin(time * 0.004 + b) * (width * 0.22);
+            const by = centerY + Math.cos(time * 0.005 + b) * (height * 0.22);
+            const size = 50 + b * 20;
+            const rotX = time * 0.003 + b;
+            const rotY = time * 0.005 + b;
+            
+            const vertices = [
+              [-1,-1,-1], [1,-1,-1], [1,1,-1], [-1,1,-1],
+              [-1,-1,1],  [1,-1,1],  [1,1,1],  [-1,1,1]
+            ];
+            
+            const projected = vertices.map(v => {
+              let x = v[0] * size;
+              let y = v[1] * size;
+              let z = v[2] * size;
+              
+              let x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
+              let z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
+              let y2 = y * Math.cos(rotX) - z1 * Math.sin(rotX);
+              let z2 = y * Math.sin(rotX) + z1 * Math.cos(rotX);
+              
+              const dist = 350;
+              const f = dist / (dist + z2);
+              return [bx + x1 * f, by + y2 * f];
+            });
+            
+            const edges = [
+              [0,1], [1,2], [2,3], [3,0],
+              [4,5], [5,6], [6,7], [7,4],
+              [0,4], [1,5], [2,6], [3,7]
+            ];
+            
+            ctx.beginPath();
+            edges.forEach(e => {
+              ctx.moveTo(projected[e[0]][0], projected[e[0]][1]);
+              ctx.lineTo(projected[e[1]][0], projected[e[1]][1]);
+            });
+            ctx.stroke();
+          }
+        }
+        else {
+          ctx.strokeStyle = 'rgba(212, 175, 55, 0.02)';
+          ctx.lineWidth = 2;
+          const px = mouseX > -500 ? mouseX : centerX;
+          const py = mouseY > -500 ? mouseY : centerY;
+          for (let i = 0; i < 5; i++) {
+            const pulse = (time * 0.5 + i * 100) % 500;
+            ctx.beginPath(); ctx.arc(px, py, pulse, 0, Math.PI * 2); ctx.stroke();
+          }
+        }
+
+        if (sparks.length > 0) {
+          for (let i = sparks.length - 1; i >= 0; i--) {
+            const s = sparks[i]; sparks[i].x += s.vx; sparks[i].y += s.vy; sparks[i].alpha -= 0.025;
+            if (s.alpha <= 0) {
+              sparks.splice(i, 1);
+            } else {
+              ctx.fillStyle = `rgba(212, 175, 55, ${s.alpha * 0.6})`;
+              ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2); ctx.fill();
+            }
+          }
+        }
+        
+        time++;
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+  </script>
+</body>
+</html>

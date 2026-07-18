@@ -1,0 +1,27 @@
+#!/bin/zsh
+# Field Register Coordinator - Local Aether execution
+# Each venture runs as autonomous mining node
+
+REGISTER_ID=${1:-venture-1}
+VENTURE_DIR="${2:-.}"
+STATE_DIR="$VENTURE_DIR/.mining_state"
+LOG_FILE="$VENTURE_DIR/.mining_log"
+
+mkdir -p "$STATE_DIR"
+
+# Baseline: 204.88 H/s per venture
+BASELINE=204.88
+
+cycle=0
+while true; do
+    ((cycle++))
+    ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    
+    # Simulate Q9 feedback
+    q9=$((70 + RANDOM % 20))
+    q9_dec="0.$q9"
+    k=$((10 + 40 * ${q9%.*} / 100))
+    
+    echo "[$ts] CYCLE=$cycle VENTURE=$REGISTER_ID Q9=$q9_dec K=$k HASHRATE=$BASELINE" >> "$LOG_FILE"
+    sleep 60
+done

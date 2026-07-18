@@ -1,0 +1,35 @@
+0
+register
+1
+1
+1776174703
+cc235c761a422ee49affb77201d4c376
+corporate|mosmil|sovereign|business
+
+; register.mosmil — golfcad.cc venture register
+; Generated 2026-04-14 09:51:43 by MASCOM Phase 19 expander
+
+FIELD.DECLARE venture::golfcad.cc
+FIELD.EIGENVALUE 91
+FIELD.SYNDROME golfcad.cc
+FIELD.EPOCH 2026.04.14
+FIELD.CLASS corporate
+FIELD.TAGS [corporate|mosmil|sovereign|business]
+FIELD.STATUS seeded
+
+SUBSTRATE golfcad.cc
+  ELEMENT field_register
+  DOMAIN substrate.field
+  RANK 91
+END SUBSTRATE
+
+Q9.GROUND venture::golfcad.cc
+  BIND FIELD.EIGENVALUE -> Q9.ENERGY
+  BIND FIELD.SYNDROME -> Q9.LABEL
+  COLLAPSE EIGENSTATE
+END Q9.GROUND
+
+FORGE.CRYSTALLIZE venture::golfcad.cc
+  SEED register
+  AWAIT FORGE.EVOLVE
+END FORGE.CRYSTALLIZE

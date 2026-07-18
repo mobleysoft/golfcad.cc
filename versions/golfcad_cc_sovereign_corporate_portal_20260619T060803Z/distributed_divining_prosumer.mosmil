@@ -1,0 +1,21 @@
+MODULE distributed_divining_prosumer
+
+; Fresh minimal divining prosumer
+; Called synchronously by orchestrator once per cycle
+; Simply executes and reports, no blocking I/O
+
+DECLARE
+  REG R_VENTURE        "golfcad.cc"
+  REG R_HASHRATE       "15"
+  REG R_REGIME         "MEDIUM"
+  REG R_NOW            ""
+
+PROC execute_iteration
+  ; Simulate mining (in production: GPU mining orchestrator)
+  SET R_HASHRATE "15"
+  LOG "[divining] executed: venture=" R_VENTURE " yield=" R_HASHRATE
+END PROC
+
+ENTRY
+  CALL execute_iteration
+END ENTRY
