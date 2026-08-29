@@ -1,0 +1,15 @@
+{
+  "aliasRoots": [],
+  "canonicalIndex": "/Users/johnmobley/golfcad.cc/index.html",
+  "canonicalRoot": "/Users/johnmobley/golfcad.cc",
+  "contentHash": "2fa4a98c8dffe1e92f30690d4759096a85aab45f79bcbaf8ee520c831690ed2f",
+  "domain": "golfcad.cc",
+  "generatedAt": "2026-06-19T16:07:44.654213+00:00",
+  "note": "Canonical root is the live source of truth. Versions are stored beneath the root.",
+  "sourceKind": "canonical-root",
+  "sourceOfTruth": "/Users/johnmobley/golfcad.cc/index.html",
+  "sourcePath": "/Users/johnmobley/golfcad.cc",
+  "title": "GOLFCAD.CC | Sovereign Corporate Portal",
+  "versionLabel": "golfcad_cc_sovereign_corporate_portal_20260619T060803Z",
+  "versionPath": "/Users/johnmobley/golfcad.cc/versions/golfcad_cc_sovereign_corporate_portal_20260619T060803Z"
+}

@@ -418,7 +418,7 @@ let winZIndex = 10;
 let winIdCounter = 0;
 const openWindows = {};
 const _LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-const API_BASE = _LOCAL ? 'http://localhost:8080' : ''; // Sovereign: relative path, served by flowistan on GravNova
+const API_BASE = _LOCAL ? '' : ''; // Sovereign: relative path, served by flowistan on GravNova
 const WS_URL = _LOCAL ? 'ws://localhost:8765' : null; // Remote WS disabled — tunnel port mismatch
 let ws = null;
 
@@ -508,7 +508,7 @@ loginEmail.addEventListener('keydown', e => { if (e.key === 'Enter') loginPasswo
 const _T_WS = _LOCAL ? 'ws://localhost:7681' : null; // TODO: sovereign WS endpoint
 const _CC_WS = _LOCAL ? 'ws://localhost:7685' : null;
 const _MIRROR_WS = _LOCAL ? 'ws://localhost:7690' : null;
-const _MIRROR_API = _LOCAL ? 'http://localhost:7690/peers' : null;
+const _MIRROR_API = _LOCAL ? '/peers' : null;
 
 function _buildTerminalInner(container, wsUrl, label) {
   Object.assign(container.style, { background:'var(--ob-void)', padding:'0', overflow:'hidden', flexDirection:'column' });
@@ -5010,7 +5010,7 @@ function buildGetFilms(container) {
 function buildBrowser(container) {
   container.style.cssText = 'padding:0;overflow:hidden;display:flex;flex-direction:column;';
 
-  const BROWSER_API = 'http://localhost:7691';
+  const BROWSER_API = '';
   let tabs = [{id:1, url:'about:blank', title:'New Tab', loading:false}];
   let activeTab = 1;
   let tabCounter = 1;
@@ -5192,7 +5192,7 @@ function buildBrowser(container) {
 
 // ── Captain's Log ──
 function buildCaptainsLog(container) {
-  const CL_API = _LOCAL ? 'http://localhost:7692' : null; // TODO: sovereign Captain's Log API
+  const CL_API = _LOCAL ? '' : null; // TODO: sovereign Captain's Log API
   const CAT_COLORS = {
     directive:'#f0b800', response:'#c8c8d4', build:'#3b82f6', fix:'#f87171',
     deploy:'#22c55e', training:'#34d399', decision:'#f59e0b', error:'#ef4444',

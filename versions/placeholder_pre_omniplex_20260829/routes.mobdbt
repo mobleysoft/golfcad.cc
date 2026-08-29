@@ -1,0 +1,20 @@
+{
+  "format": "mobdbt",
+  "name": "golfcad.cc_routes",
+  "version": "3.1.0",
+  "description": "golfcad.cc sovereign edge routes",
+  "venture": "golfcad.cc",
+  "domain": "golfcad.cc",
+  "collections": {
+    "routes": [
+      { "pattern": "GET /", "being": "index_being", "auth": false, "file": "index.html" },
+      { "pattern": "GET /*", "being": "home_being", "auth": false, "file": "index.html" }
+    ]
+  },
+  "generator": {
+    "auto_generated": true,
+    "source": "evolution_engine",
+    "gen": 1677,
+    "ts": "2026-04-07T21:52:26Z"
+  }
+}
