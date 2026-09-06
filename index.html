@@ -1,221 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GOLFCAD.CC | Sovereign Operations</title>
-    <style>
-        :root {
-            --bg-dark: #050505;
-            --accent-glow: rgba(0, 255, 204, 0.15);
-            --glass-bg: rgba(20, 20, 20, 0.4);
-            --glass-border: rgba(255, 255, 255, 0.05);
-            --text-primary: #f0f0f0;
-            --text-muted: #888;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
-            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%);
-        }
-        /* WebGL Container Layer */
-        #canvas-container {
-            position: absolute;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 0;
-        }
-        /* Somatic UI Layer (Glassmorphism) */
-        .glass-panel {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            max-width: 800px;
-            padding: 40px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
-            z-index: 10;
-            animation: emerge 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            opacity: 0;
-        }
-        @keyframes emerge {
-            0% { opacity: 0; transform: translate(-50%, -45%) scale(0.95); filter: blur(10px); }
-            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
-        }
-        h1 {
-            font-size: 3rem;
-            letter-spacing: -0.05em;
-            margin: 0 0 10px 0;
-            background: linear-gradient(180deg, #fff 0%, #aaa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .metrics {
-            display: flex;
-            gap: 20px;
-            margin-top: 30px;
-        }
-        .metric-card {
-            flex: 1;
-            padding: 20px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.03);
-            transition: all 0.3s ease;
-        }
-        .metric-card:hover {
-            background: rgba(255,255,255,0.03);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px var(--accent-glow);
-        }
-        .metric-value { font-size: 2rem; font-weight: 600; color: #00ffcc; }
-        .metric-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 5px; }
-        
-        /* Micro-interactions */
-        .status-dot {
-            display: inline-block; width: 8px; height: 8px;
-            background: #00ffcc; border-radius: 50%;
-            margin-right: 10px;
-            box-shadow: 0 0 10px #00ffcc;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 0.5; box-shadow: 0 0 5px #00ffcc; }
-            50% { opacity: 1; box-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc; }
-            100% { opacity: 0.5; box-shadow: 0 0 5px #00ffcc; }
-        }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-    <!-- MASCOM_ANALYTICS_CORTEX -->
-    <script>
-        (function() {
-            try {
-                const payload = {
-                    node: "golfcad.cc",
-                    timestamp: new Date().toISOString(),
-                    vector: window.location.pathname,
-                    agent: navigator.userAgent
-                };
-                navigator.sendBeacon("http://127.0.0.1:8889/track", JSON.stringify(payload));
-            } catch(e) {}
-        })();
-    </script>
-    
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GolfCAD — Swing Tempo &amp; Biomechanics Analysis</title>
+<meta name="description" content="GolfCAD: computer-aided swing tempo analysis for golfers. Real, working tempo-ratio calculator, no account required.">
+<style>
+  :root {
+    --bg: #0b1210;
+    --panel: #10201b;
+    --accent: #3ddc84;
+    --accent-dim: #1f6b46;
+    --text: #eafff2;
+    --muted: #8fb8a4;
+    --border: rgba(61,220,132,0.18);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  header {
+    padding: 48px 24px 24px;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 12px;
+    margin-bottom: 18px;
+  }
+  h1 { font-size: 2.4rem; margin: 0 0 12px; letter-spacing: -0.02em; }
+  p.lede { color: var(--muted); max-width: 640px; font-size: 1.05rem; }
+  main { max-width: 880px; margin: 0 auto; padding: 0 24px 64px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .card h2 { margin-top: 0; font-size: 1.2rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .field { flex: 1; min-width: 160px; }
+  label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; }
+  input[type=number] {
+    width: 100%;
+    background: #081410;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 1rem;
+  }
+  button {
+    background: var(--accent);
+    color: #052014;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-top: 18px;
+  }
+  button:hover { background: #5ff29d; }
+  #result { margin-top: 20px; padding: 18px; border-radius: 10px; background: #081410; border: 1px solid var(--border); display: none; }
+  #result.show { display: block; }
+  .ratio { font-size: 2rem; font-weight: 700; color: var(--accent); }
+  .verdict { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
+  .honesty {
+    font-size: 0.82rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    margin-top: 8px;
+  }
+  footer { max-width: 880px; margin: 0 auto; padding: 24px; color: var(--muted); font-size: 0.8rem; }
+  a { color: var(--accent); }
+</style>
 </head>
 <body>
-    <div id="canvas-container"></div>
-    
-    <div class="glass-panel">
-        <div style="display: flex; align-items: center; margin-bottom: 20px;">
-            <div class="status-dot"></div>
-            <span style="color: var(--text-muted); font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase;">SOVEREIGN NODE ACTIVE</span>
-        </div>
-        <h1>GOLFCAD.CC</h1>
-        <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; max-width: 600px;">
-            Premium, enigmatic, hyper-modern. Physical environment protocol: cyber_grid.
-        </p>
-        
-        <div class="metrics">
-            <div class="metric-card">
-                <div class="metric-value">99.9%</div>
-                <div class="metric-label">Neural Coherence</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">0ms</div>
-                <div class="metric-label">API Latency</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">LOCAL</div>
-                <div class="metric-label">Execution Vector</div>
-            </div>
-        </div>
+<header>
+  <span class="tag">Prototype · v0.1</span>
+  <h1>GolfCAD</h1>
+  <p class="lede">Predictive golf swing biomechanics analysis and computer-aided training.
+  This page runs one real, working piece of that: a tempo-ratio calculator comparing your
+  backswing-to-downswing timing against the tour-average benchmark used by swing coaches.</p>
+</header>
+<main>
+  <div class="card">
+    <h2>Swing tempo calculator</h2>
+    <p style="color:var(--muted); font-size:0.9rem; margin-top:-8px;">
+      Time your swing on video (frame count or stopwatch, in tenths of a second) and enter the two phases below.
+      Tour average tempo is close to a 3:1 backswing:downswing ratio (source: published swing-tempo research,
+      e.g. Tom Tomasello / trackable via most swing-analysis apps).
+    </p>
+    <div class="row">
+      <div class="field">
+        <label for="back">Backswing time (seconds)</label>
+        <input type="number" id="back" min="0" step="0.01" placeholder="0.75">
+      </div>
+      <div class="field">
+        <label for="down">Downswing time (seconds)</label>
+        <input type="number" id="down" min="0" step="0.01" placeholder="0.25">
+      </div>
     </div>
-
-    <script>
-        // Evolved WebGL Matrix
-        const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x050505, 0.002);
-        
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        container.appendChild(renderer.domElement);
-        
-        // Complex geometry generation instead of naked cubes
-        const geometry = new THREE.IcosahedronGeometry(10, 1);
-        const material = new THREE.MeshBasicMaterial({ 
-            color: 0x00ffcc, 
-            wireframe: true,
-            transparent: true,
-            opacity: 0.15
-        });
-        
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-        
-        // Particles
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 2000;
-        const posArray = new Float32Array(particlesCount * 3);
-        for(let i=0; i<particlesCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 100;
-        }
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particlesMaterial = new THREE.PointsMaterial({
-            size: 0.05,
-            color: 0x00ffcc,
-            transparent: true,
-            opacity: 0.5
-        });
-        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particlesMesh);
-        
-        camera.position.z = 25;
-        
-        // Interactive Mouse Tracking
-        let mouseX = 0;
-        let mouseY = 0;
-        document.addEventListener('mousemove', (event) => {
-            mouseX = event.clientX / window.innerWidth - 0.5;
-            mouseY = event.clientY / window.innerHeight - 0.5;
-        });
-        
-        function animate() {
-            requestAnimationFrame(animate);
-            mesh.rotation.x += 0.001;
-            mesh.rotation.y += 0.002;
-            
-            particlesMesh.rotation.y = -mouseX * 0.5;
-            particlesMesh.rotation.x = -mouseY * 0.5;
-            
-            renderer.render(scene, camera);
-        }
-        animate();
-        
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
-
-    <!-- MASCOM_INTERLINK -->
-    <div style="position: absolute; bottom: 20px; right: 40px; z-index: 100; font-family: monospace; font-size: 0.7rem; letter-spacing: 0.1em; display: flex; gap: 20px;">
-        <a href="blog.html" style="color: #00ffcc; text-decoration: none; text-shadow: 0 0 5px rgba(0,255,204,0.3); transition: color 0.2s;">INTELLIGENCE CORTEX</a>
-        
-        <a href="http://localhost:8888" style="color: #888; text-decoration: none; transition: color 0.2s;">SOVEREIGN GATEWAY</a>
+    <button onclick="computeTempo()">Analyze tempo</button>
+    <div id="result">
+      <div class="ratio" id="ratioOut"></div>
+      <div class="verdict" id="verdictOut"></div>
     </div>
-    
+  </div>
+
+  <div class="card">
+    <h2>What's real here, what isn't yet</h2>
+    <p class="honesty">
+      The tempo calculator above runs entirely in your browser and gives a real, correct
+      ratio calculation — no fake numbers. It is one narrow slice of the full "biomechanics
+      analysis and computer-aided training" product named in this venture's spec, not the
+      whole thing: full swing-plane video analysis, joint-angle tracking, and a coached
+      training program are not built yet. This page will be extended as those pieces
+      become real, rather than described as if they already exist.
+    </p>
+  </div>
+</main>
+<footer>
+  golfcad.cc — part of the golf-tech cluster alongside
+  <a href="https://golflink.cc">golflink.cc</a> (stats &amp; history ledger) and
+  <a href="https://golfmind.cc">golfmind.cc</a> (mental performance training).
+</footer>
+<script>
+function computeTempo() {
+  var back = parseFloat(document.getElementById('back').value);
+  var down = parseFloat(document.getElementById('down').value);
+  var result = document.getElementById('result');
+  if (!back || !down || back <= 0 || down <= 0) {
+    result.classList.add('show');
+    document.getElementById('ratioOut').textContent = '—';
+    document.getElementById('verdictOut').textContent = 'Enter both times as positive numbers.';
+    return;
+  }
+  var ratio = back / down;
+  var verdict;
+  if (Math.abs(ratio - 3) < 0.25) {
+    verdict = 'Right in the tour-average band (about 3:1). Tempo looks consistent.';
+  } else if (ratio > 3.25) {
+    verdict = 'Backswing is relatively slow versus downswing — tempo is longer than the 3:1 average.';
+  } else {
+    verdict = 'Downswing is relatively quick versus backswing — tempo is tighter than the 3:1 average.';
+  }
+  document.getElementById('ratioOut').textContent = ratio.toFixed(2) + ' : 1';
+  document.getElementById('verdictOut').textContent = verdict;
+  result.classList.add('show');
+}
+</script>
 </body>
 </html>
