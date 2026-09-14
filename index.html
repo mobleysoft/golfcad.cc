@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GolfCAD — Swing Tempo &amp; Biomechanics Analysis</title>
-<meta name="description" content="GolfCAD: computer-aided swing tempo analysis for golfers. Real, working tempo-ratio calculator, no account required.">
+<meta name="description" content="GolfCAD: computer-aided swing analysis for golfers. Real, working tempo-ratio and smash-factor calculators, no account required.">
 <style>
   :root {
     --bg: #0b1210;
@@ -74,8 +74,17 @@
     margin-top: 18px;
   }
   button:hover { background: #5ff29d; }
-  #result { margin-top: 20px; padding: 18px; border-radius: 10px; background: #081410; border: 1px solid var(--border); display: none; }
-  #result.show { display: block; }
+  #result, #smashResult { margin-top: 20px; padding: 18px; border-radius: 10px; background: #081410; border: 1px solid var(--border); display: none; }
+  #result.show, #smashResult.show { display: block; }
+  select {
+    width: 100%;
+    background: #081410;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 1rem;
+  }
   .ratio { font-size: 2rem; font-weight: 700; color: var(--accent); }
   .verdict { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
   .honesty {
@@ -104,8 +113,9 @@
   <span class="tag">Prototype · v0.1</span>
   <h1>GolfCAD</h1>
   <p class="lede">Predictive golf swing biomechanics analysis and computer-aided training.
-  This page runs one real, working piece of that: a tempo-ratio calculator comparing your
-  backswing-to-downswing timing against the tour-average benchmark used by swing coaches.</p>
+  This page runs two real, working pieces of that: a tempo-ratio calculator comparing your
+  backswing-to-downswing timing against the tour-average benchmark used by swing coaches,
+  and a smash-factor calculator measuring strike efficiency from clubhead and ball speed.</p>
 </header>
 <main>
   <div class="card">
@@ -146,16 +156,67 @@
   </div>
 
   <div class="card">
+    <h2>Smash factor calculator</h2>
+    <p style="color:var(--muted); font-size:0.9rem; margin-top:-8px;">
+      Smash factor is a real, standard club-fitting metric: ball speed divided by clubhead
+      speed, a direct measure of strike efficiency (energy transfer at impact). Get both
+      numbers from a launch monitor, swing-speed radar, or any app that reports them, then
+      enter them below. Max efficient smash factor is limited by the physics of the
+      collision (roughly 1.5 for a driver with modern COR rules) — higher isn't always
+      better if it comes with a mis-hit launch angle, but it's a real, checkable number.
+    </p>
+    <div class="row">
+      <div class="field">
+        <label for="clubSpeed">Clubhead speed (mph)</label>
+        <input type="number" id="clubSpeed" min="0" step="0.1" placeholder="95">
+      </div>
+      <div class="field">
+        <label for="ballSpeed">Ball speed (mph)</label>
+        <input type="number" id="ballSpeed" min="0" step="0.1" placeholder="140">
+      </div>
+      <div class="field">
+        <label for="clubType">Club</label>
+        <select id="clubType">
+          <option value="1.50">Driver (benchmark 1.50)</option>
+          <option value="1.40">Fairway wood / hybrid (benchmark 1.40)</option>
+          <option value="1.33">Mid iron (benchmark 1.33)</option>
+          <option value="1.20">Wedge (benchmark 1.20)</option>
+        </select>
+      </div>
+    </div>
+    <button onclick="computeSmash()">Analyze smash factor</button>
+    <button id="saveSmashBtn" onclick="saveSmash()" disabled>Save this shot</button>
+    <div id="smashResult">
+      <div class="ratio" id="smashRatioOut"></div>
+      <div class="verdict" id="smashVerdictOut"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Smash factor history</h2>
+    <p style="color:var(--muted); font-size:0.9rem; margin-top:-8px;">
+      Strike efficiency varies shot to shot more than swing tempo does. Save each analyzed
+      shot to see your real average smash factor by club over time.
+    </p>
+    <div id="smashAvgLine" class="avg-line"></div>
+    <div id="smashHistTableWrap"></div>
+    <p id="smashEmptyHist">No saved shots yet — analyze one above, then click "Save this shot".</p>
+    <button id="clearSmashHistBtn" onclick="clearSmashHistory()" style="display:none;">Clear saved history</button>
+  </div>
+
+  <div class="card">
     <h2>What's real here, what isn't yet</h2>
     <p class="honesty">
-      The tempo calculator above runs entirely in your browser and gives a real, correct
-      ratio calculation — no fake numbers. Saved swing history is stored only in this
-      browser's local storage: no account, no server, nothing synced across devices, and
-      "Clear saved history" really deletes it (there is no copy anywhere else). This is one
-      narrow slice of the full "biomechanics analysis and computer-aided training" product
-      named in this venture's spec, not the whole thing: full swing-plane video analysis,
-      joint-angle tracking, and a coached training program are not built yet. This page will
-      be extended as those pieces become real, rather than described as if they already exist.
+      Both calculators above run entirely in your browser and give real, correct
+      calculations — no fake numbers. Saved history (tempo and smash factor, separately) is
+      stored only in this browser's local storage: no account, no server, nothing synced
+      across devices, and "Clear saved history" really deletes it (there is no copy
+      anywhere else). These are two narrow slices of the full "biomechanics analysis and
+      computer-aided training" product named in this venture's spec, not the whole thing:
+      full swing-plane video analysis, joint-angle tracking, and a coached training program
+      are not built yet — those require pose-estimation input this account does not
+      currently have wired up, so they aren't described as if they exist. This page will be
+      extended as those pieces become real.
     </p>
   </div>
 </main>
@@ -261,6 +322,116 @@ function renderHistory() {
 }
 
 renderHistory();
+
+var SMASH_HIST_KEY = 'golfcad_smash_history';
+var SMASH_HIST_MAX = 50;
+var lastSmash = null;
+
+function smashVerdictFor(ratio, benchmark) {
+  var diff = ratio - benchmark;
+  if (Math.abs(diff) < 0.03) {
+    return 'Right at the benchmark for this club (' + benchmark.toFixed(2) + '). Efficient, centered strike.';
+  } else if (diff < 0) {
+    return 'Below the ' + benchmark.toFixed(2) + ' benchmark for this club — energy is being lost at impact ' +
+      '(off-center strike, or a glancing angle of attack).';
+  }
+  return 'Above the ' + benchmark.toFixed(2) + ' benchmark for this club — check the ball speed reading; ' +
+    'sustained numbers this high for this club type are physically unusual.';
+}
+
+function computeSmash() {
+  var clubSpeed = parseFloat(document.getElementById('clubSpeed').value);
+  var ballSpeed = parseFloat(document.getElementById('ballSpeed').value);
+  var benchmark = parseFloat(document.getElementById('clubType').value);
+  var clubLabel = document.getElementById('clubType').selectedOptions[0].text;
+  var result = document.getElementById('smashResult');
+  var saveBtn = document.getElementById('saveSmashBtn');
+  if (!clubSpeed || !ballSpeed || clubSpeed <= 0 || ballSpeed <= 0) {
+    result.classList.add('show');
+    document.getElementById('smashRatioOut').textContent = '—';
+    document.getElementById('smashVerdictOut').textContent = 'Enter both speeds as positive numbers.';
+    lastSmash = null;
+    saveBtn.disabled = true;
+    return;
+  }
+  var ratio = ballSpeed / clubSpeed;
+  var verdict = smashVerdictFor(ratio, benchmark);
+  document.getElementById('smashRatioOut').textContent = ratio.toFixed(3);
+  document.getElementById('smashVerdictOut').textContent = verdict;
+  result.classList.add('show');
+  lastSmash = { clubSpeed: clubSpeed, ballSpeed: ballSpeed, ratio: ratio, club: clubLabel, benchmark: benchmark };
+  saveBtn.disabled = false;
+}
+
+function loadSmashHistory() {
+  try {
+    var raw = localStorage.getItem(SMASH_HIST_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveSmash() {
+  if (!lastSmash) return;
+  var hist = loadSmashHistory();
+  hist.push({
+    ts: Date.now(),
+    clubSpeed: lastSmash.clubSpeed,
+    ballSpeed: lastSmash.ballSpeed,
+    ratio: lastSmash.ratio,
+    club: lastSmash.club,
+    benchmark: lastSmash.benchmark
+  });
+  if (hist.length > SMASH_HIST_MAX) hist = hist.slice(hist.length - SMASH_HIST_MAX);
+  try {
+    localStorage.setItem(SMASH_HIST_KEY, JSON.stringify(hist));
+  } catch (e) {
+    // localStorage unavailable (private mode / quota) - nothing saved, history stays empty on reload
+  }
+  renderSmashHistory();
+}
+
+function clearSmashHistory() {
+  try { localStorage.removeItem(SMASH_HIST_KEY); } catch (e) {}
+  renderSmashHistory();
+}
+
+function renderSmashHistory() {
+  var hist = loadSmashHistory();
+  var wrap = document.getElementById('smashHistTableWrap');
+  var empty = document.getElementById('smashEmptyHist');
+  var avgLine = document.getElementById('smashAvgLine');
+  var clearBtn = document.getElementById('clearSmashHistBtn');
+
+  if (!hist.length) {
+    wrap.innerHTML = '';
+    avgLine.textContent = '';
+    empty.style.display = 'block';
+    clearBtn.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  clearBtn.style.display = 'inline-block';
+
+  var sum = 0;
+  for (var i = 0; i < hist.length; i++) sum += hist[i].ratio;
+  var avg = sum / hist.length;
+  avgLine.innerHTML = 'Your average over ' + hist.length + ' saved shot' + (hist.length === 1 ? '' : 's') +
+    ': <strong>' + avg.toFixed(3) + '</strong>';
+
+  var recent = hist.slice().reverse().slice(0, 10);
+  var rows = recent.map(function (s) {
+    var d = new Date(s.ts);
+    var dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return '<tr><td>' + dateStr + '</td><td>' + s.club + '</td><td>' + s.ratio.toFixed(3) + '</td><td>' +
+      smashVerdictFor(s.ratio, s.benchmark) + '</td></tr>';
+  }).join('');
+  wrap.innerHTML = '<table class="history"><thead><tr><th>Saved</th><th>Club</th><th>Smash factor</th><th>Verdict</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+renderSmashHistory();
 </script>
 </body>
 </html>
