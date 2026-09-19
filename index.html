@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GolfCAD — Swing Tempo &amp; Biomechanics Analysis</title>
-<meta name="description" content="GolfCAD: computer-aided swing analysis for golfers. Real, working tempo-ratio and smash-factor calculators, no account required.">
+<meta name="description" content="GolfCAD: computer-aided swing analysis for golfers. Real, working tempo-ratio, smash-factor, and spin-loft calculators, no account required.">
 <style>
   :root {
     --bg: #0b1210;
@@ -74,8 +74,8 @@
     margin-top: 18px;
   }
   button:hover { background: #5ff29d; }
-  #result, #smashResult { margin-top: 20px; padding: 18px; border-radius: 10px; background: #081410; border: 1px solid var(--border); display: none; }
-  #result.show, #smashResult.show { display: block; }
+  #result, #smashResult, #spinResult { margin-top: 20px; padding: 18px; border-radius: 10px; background: #081410; border: 1px solid var(--border); display: none; }
+  #result.show, #smashResult.show, #spinResult.show { display: block; }
   select {
     width: 100%;
     background: #081410;
@@ -96,16 +96,16 @@
   }
   footer { max-width: 880px; margin: 0 auto; padding: 24px; color: var(--muted); font-size: 0.8rem; }
   a { color: var(--accent); }
-  #saveBtn { background: transparent; border: 1px solid var(--border); color: var(--accent); margin-left: 10px; }
-  #saveBtn:hover { background: var(--accent-dim); color: var(--text); }
-  #saveBtn:disabled { opacity: 0.4; cursor: default; }
+  #saveBtn, #saveSmashBtn, #saveSpinBtn { background: transparent; border: 1px solid var(--border); color: var(--accent); margin-left: 10px; }
+  #saveBtn:hover, #saveSmashBtn:hover, #saveSpinBtn:hover { background: var(--accent-dim); color: var(--text); }
+  #saveBtn:disabled, #saveSmashBtn:disabled, #saveSpinBtn:disabled { opacity: 0.4; cursor: default; }
   table.history { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 12px; }
   table.history th, table.history td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
   table.history th { color: var(--muted); font-weight: 500; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
   .avg-line { font-size: 0.95rem; margin: 10px 0 4px; }
   .avg-line strong { color: var(--accent); }
-  #clearHistBtn { background: transparent; border: none; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: 0.8rem; padding: 0; margin-top: 10px; }
-  #emptyHist { color: var(--muted); font-size: 0.88rem; }
+  #clearHistBtn, #clearSmashHistBtn, #clearSpinHistBtn { background: transparent; border: none; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: 0.8rem; padding: 0; margin-top: 10px; }
+  #emptyHist, #smashEmptyHist, #spinEmptyHist { color: var(--muted); font-size: 0.88rem; }
 </style>
 </head>
 <body>
@@ -113,9 +113,10 @@
   <span class="tag">Prototype · v0.1</span>
   <h1>GolfCAD</h1>
   <p class="lede">Predictive golf swing biomechanics analysis and computer-aided training.
-  This page runs two real, working pieces of that: a tempo-ratio calculator comparing your
+  This page runs three real, working pieces of that: a tempo-ratio calculator comparing your
   backswing-to-downswing timing against the tour-average benchmark used by swing coaches,
-  and a smash-factor calculator measuring strike efficiency from clubhead and ball speed.</p>
+  a smash-factor calculator measuring strike efficiency from clubhead and ball speed, and a
+  spin-loft calculator showing how your delivered loft and angle of attack combine to spin the ball.</p>
 </header>
 <main>
   <div class="card">
@@ -205,18 +206,59 @@
   </div>
 
   <div class="card">
+    <h2>Spin loft calculator</h2>
+    <p style="color:var(--muted); font-size:0.9rem; margin-top:-8px;">
+      Spin loft is a real, well-documented swing metric: the dynamic loft the clubface
+      presents at impact, minus the club's angle of attack (negative for a descending strike,
+      positive for an ascending one). It is a real driver of backspin and launch conditions,
+      independent of tempo or smash factor. Get dynamic loft and angle of attack from a
+      launch monitor or swing-analysis app, then enter them below. The ranges below are
+      commonly cited in club-fitting/instruction content as general guidance, not a precise
+      measurement this page itself performs.
+    </p>
+    <div class="row">
+      <div class="field">
+        <label for="dynLoft">Dynamic loft (degrees)</label>
+        <input type="number" id="dynLoft" step="0.1" placeholder="14">
+      </div>
+      <div class="field">
+        <label for="attackAngle">Angle of attack (degrees, negative = descending)</label>
+        <input type="number" id="attackAngle" step="0.1" placeholder="-3">
+      </div>
+    </div>
+    <button onclick="computeSpinLoft()">Analyze spin loft</button>
+    <button id="saveSpinBtn" onclick="saveSpin()" disabled>Save this swing</button>
+    <div id="spinResult">
+      <div class="ratio" id="spinRatioOut"></div>
+      <div class="verdict" id="spinVerdictOut"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Spin loft history</h2>
+    <p style="color:var(--muted); font-size:0.9rem; margin-top:-8px;">
+      Spin loft varies more swing-to-swing than tempo does, especially with angle of attack.
+      Save each analyzed swing to see your real average over time.
+    </p>
+    <div id="spinAvgLine" class="avg-line"></div>
+    <div id="spinHistTableWrap"></div>
+    <p id="spinEmptyHist">No saved swings yet — analyze one above, then click "Save this swing".</p>
+    <button id="clearSpinHistBtn" onclick="clearSpinHistory()" style="display:none;">Clear saved history</button>
+  </div>
+
+  <div class="card">
     <h2>What's real here, what isn't yet</h2>
     <p class="honesty">
-      Both calculators above run entirely in your browser and give real, correct
-      calculations — no fake numbers. Saved history (tempo and smash factor, separately) is
-      stored only in this browser's local storage: no account, no server, nothing synced
-      across devices, and "Clear saved history" really deletes it (there is no copy
-      anywhere else). These are two narrow slices of the full "biomechanics analysis and
-      computer-aided training" product named in this venture's spec, not the whole thing:
-      full swing-plane video analysis, joint-angle tracking, and a coached training program
-      are not built yet — those require pose-estimation input this account does not
-      currently have wired up, so they aren't described as if they exist. This page will be
-      extended as those pieces become real.
+      All three calculators above run entirely in your browser and give real, correct
+      calculations — no fake numbers. Saved history (tempo, smash factor, and spin loft,
+      separately) is stored only in this browser's local storage: no account, no server,
+      nothing synced across devices, and "Clear saved history" really deletes it (there is
+      no copy anywhere else). These are three narrow slices of the full "biomechanics
+      analysis and computer-aided training" product named in this venture's spec, not the
+      whole thing: full swing-plane video analysis, joint-angle tracking, and a coached
+      training program are not built yet — those require pose-estimation input this account
+      does not currently have wired up, so they aren't described as if they exist. This page
+      will be extended as those pieces become real.
     </p>
   </div>
 </main>
@@ -432,6 +474,111 @@ function renderSmashHistory() {
 }
 
 renderSmashHistory();
+
+var SPIN_HIST_KEY = 'golfcad_spin_history';
+var SPIN_HIST_MAX = 50;
+var lastSpin = null;
+
+function spinLoftVerdictFor(spinLoft) {
+  if (spinLoft < 20) {
+    return 'Low spin loft — the kind of efficient, lower-spin launch condition common among ' +
+      'better players hitting driver on the way up.';
+  } else if (spinLoft <= 30) {
+    return 'Moderate spin loft — a typical range for irons and many amateur driver swings.';
+  }
+  return 'High spin loft — likely producing extra backspin and a ballooning shot, often from a ' +
+    'steep angle of attack or too much loft delivered at impact.';
+}
+
+function computeSpinLoft() {
+  var dynLoft = parseFloat(document.getElementById('dynLoft').value);
+  var attackAngle = parseFloat(document.getElementById('attackAngle').value);
+  var result = document.getElementById('spinResult');
+  var saveBtn = document.getElementById('saveSpinBtn');
+  if (isNaN(dynLoft) || isNaN(attackAngle)) {
+    result.classList.add('show');
+    document.getElementById('spinRatioOut').textContent = '—';
+    document.getElementById('spinVerdictOut').textContent = 'Enter both dynamic loft and angle of attack as numbers.';
+    lastSpin = null;
+    saveBtn.disabled = true;
+    return;
+  }
+  var spinLoft = dynLoft - attackAngle;
+  var verdict = spinLoftVerdictFor(spinLoft);
+  document.getElementById('spinRatioOut').textContent = spinLoft.toFixed(1) + '°';
+  document.getElementById('spinVerdictOut').textContent = verdict;
+  result.classList.add('show');
+  lastSpin = { dynLoft: dynLoft, attackAngle: attackAngle, spinLoft: spinLoft };
+  saveBtn.disabled = false;
+}
+
+function loadSpinHistory() {
+  try {
+    var raw = localStorage.getItem(SPIN_HIST_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveSpin() {
+  if (!lastSpin) return;
+  var hist = loadSpinHistory();
+  hist.push({
+    ts: Date.now(),
+    dynLoft: lastSpin.dynLoft,
+    attackAngle: lastSpin.attackAngle,
+    spinLoft: lastSpin.spinLoft
+  });
+  if (hist.length > SPIN_HIST_MAX) hist = hist.slice(hist.length - SPIN_HIST_MAX);
+  try {
+    localStorage.setItem(SPIN_HIST_KEY, JSON.stringify(hist));
+  } catch (e) {
+    // localStorage unavailable (private mode / quota) - nothing saved, history stays empty on reload
+  }
+  renderSpinHistory();
+}
+
+function clearSpinHistory() {
+  try { localStorage.removeItem(SPIN_HIST_KEY); } catch (e) {}
+  renderSpinHistory();
+}
+
+function renderSpinHistory() {
+  var hist = loadSpinHistory();
+  var wrap = document.getElementById('spinHistTableWrap');
+  var empty = document.getElementById('spinEmptyHist');
+  var avgLine = document.getElementById('spinAvgLine');
+  var clearBtn = document.getElementById('clearSpinHistBtn');
+
+  if (!hist.length) {
+    wrap.innerHTML = '';
+    avgLine.textContent = '';
+    empty.style.display = 'block';
+    clearBtn.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  clearBtn.style.display = 'inline-block';
+
+  var sum = 0;
+  for (var i = 0; i < hist.length; i++) sum += hist[i].spinLoft;
+  var avg = sum / hist.length;
+  avgLine.innerHTML = 'Your average over ' + hist.length + ' saved swing' + (hist.length === 1 ? '' : 's') +
+    ': <strong>' + avg.toFixed(1) + '°</strong>';
+
+  var recent = hist.slice().reverse().slice(0, 10);
+  var rows = recent.map(function (s) {
+    var d = new Date(s.ts);
+    var dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return '<tr><td>' + dateStr + '</td><td>' + s.dynLoft.toFixed(1) + '°</td><td>' + s.spinLoft.toFixed(1) + '°</td><td>' +
+      spinLoftVerdictFor(s.spinLoft) + '</td></tr>';
+  }).join('');
+  wrap.innerHTML = '<table class="history"><thead><tr><th>Saved</th><th>Dynamic loft</th><th>Spin loft</th><th>Verdict</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+renderSpinHistory();
 </script>
 </body>
 </html>
