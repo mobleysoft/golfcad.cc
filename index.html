@@ -104,6 +104,15 @@
   table.history th { color: var(--muted); font-weight: 500; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
   .avg-line { font-size: 0.95rem; margin: 10px 0 4px; }
   .avg-line strong { color: var(--accent); }
+  .feedback { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .feedback .fb-prompt { font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
+  .feedback .fb-btn { padding: 4px 12px; font-size: 0.85rem; margin-right: 8px; }
+  .feedback textarea {
+    display: block; width: 100%; max-width: 420px; margin-top: 8px;
+    background: var(--panel); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 8px; font-family: inherit; font-size: 0.85rem;
+  }
+  .feedback .fb-thanks { color: var(--accent); font-size: 0.85rem; }
   #clearHistBtn, #clearSmashHistBtn, #clearSpinHistBtn { background: transparent; border: none; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: 0.8rem; padding: 0; margin-top: 10px; }
   #emptyHist, #smashEmptyHist, #spinEmptyHist { color: var(--muted); font-size: 0.88rem; }
 </style>
@@ -141,6 +150,12 @@
     <div id="result">
       <div class="ratio" id="ratioOut"></div>
       <div class="verdict" id="verdictOut"></div>
+    </div>
+    <div class="feedback" id="fb-tempo">
+      <div class="fb-prompt">Was this calculator helpful?</div>
+      <button class="fb-btn" onclick="submitFeedback('tempo', true)">Yes</button>
+      <button class="fb-btn" onclick="submitFeedback('tempo', false)">No</button>
+      <textarea id="fb-tempo-comment" rows="2" placeholder="Optional: what would make this more useful?"></textarea>
     </div>
   </div>
 
@@ -191,6 +206,12 @@
       <div class="ratio" id="smashRatioOut"></div>
       <div class="verdict" id="smashVerdictOut"></div>
     </div>
+    <div class="feedback" id="fb-smash_factor">
+      <div class="fb-prompt">Was this calculator helpful?</div>
+      <button class="fb-btn" onclick="submitFeedback('smash_factor', true)">Yes</button>
+      <button class="fb-btn" onclick="submitFeedback('smash_factor', false)">No</button>
+      <textarea id="fb-smash_factor-comment" rows="2" placeholder="Optional: what would make this more useful?"></textarea>
+    </div>
   </div>
 
   <div class="card">
@@ -231,6 +252,12 @@
     <div id="spinResult">
       <div class="ratio" id="spinRatioOut"></div>
       <div class="verdict" id="spinVerdictOut"></div>
+    </div>
+    <div class="feedback" id="fb-spin_loft">
+      <div class="fb-prompt">Was this calculator helpful?</div>
+      <button class="fb-btn" onclick="submitFeedback('spin_loft', true)">Yes</button>
+      <button class="fb-btn" onclick="submitFeedback('spin_loft', false)">No</button>
+      <textarea id="fb-spin_loft-comment" rows="2" placeholder="Optional: what would make this more useful?"></textarea>
     </div>
   </div>
 
@@ -579,6 +606,26 @@ function renderSpinHistory() {
 }
 
 renderSpinHistory();
+
+function submitFeedback(calculator, helpful) {
+  var container = document.getElementById('fb-' + calculator);
+  if (!container || container.dataset.sent === '1') return;
+  var commentEl = document.getElementById('fb-' + calculator + '-comment');
+  var comment = commentEl ? commentEl.value.trim().slice(0, 1000) : '';
+
+  fetch('/api/feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ calculator: calculator, helpful: helpful, comment: comment })
+  }).then(function (res) {
+    if (!res.ok) throw new Error('feedback request failed');
+    container.dataset.sent = '1';
+    container.innerHTML = '<div class="fb-thanks">Thanks for the feedback.</div>';
+  }).catch(function () {
+    // Network/worker hiccup - fail silently, no fake success message.
+    // The buttons stay clickable so the user can try again.
+  });
+}
 </script>
 </body>
 </html>

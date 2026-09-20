@@ -1,0 +1,12 @@
+name = "golfcad-cc-feedback-worker"
+main = "worker.js"
+compatibility_date = "2024-05-12"
+
+routes = [
+  { pattern = "golfcad.cc/api/feedback*", zone_name = "golfcad.cc" }
+]
+
+[[d1_databases]]
+binding = "FEEDBACK_DB"
+database_name = "golfcad-feedback-db"
+database_id = "a4afdc21-3d08-4ebd-ac70-c3814693e4fe"
